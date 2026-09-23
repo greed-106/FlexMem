@@ -27,16 +27,38 @@ FlexmMem
 ```
 ### Installation
 ```bash
-Note: We create the flexmem environment by strictly following the official LLaVA-NeXT configuration to ensure full compatibility with the base model and inference engine.
-1. Clone this repository and navigate to the LLaVA folder:
-git clone https://github.com/LLaVA-VL/LLaVA-NeXT
-cd LLaVA-NeXT
-2. Install the inference package:
-conda create -n flexmem python=3.10 -y
-conda activate flexmem
-pip install --upgrade pip 
-pip install -e ".[train]"
+uv sync
 ```
+
+`uv sync` creates a Python 3.10 environment, obtains ordinary Python packages from the Tsinghua PyPI mirror, and obtains `torch==2.9.1+cu128` and `torchvision==0.24.1+cu128` from the official CUDA 12.8 PyTorch wheel index. The latter is necessary because CUDA-enabled PyTorch wheels are not published on PyPI. To run commands inside the environment, prefix them with `uv run`.
+
+### lmms-eval
+
+The repository installs two lmms-eval model plugins: `flexmem` for the standard FlexMem implementation and `flexmem_fast` for the repository's MLVU-oriented FlexMem-fast implementation. No changes to lmms-eval's own source tree are needed. Both preserve FlexMem's streaming video sampling and reset visual memory for every example. `batch_size` must remain `1`.
+
+For LongVideoBench's video variant:
+
+```bash
+uv run lmms-eval \
+  --model flexmem \
+  --model_args pretrained=/path/to/LLaVA-Video-7B-Qwen2,batch_size=1 \
+  --tasks longvideobench_val_v \
+  --batch_size 1 \
+  --output_path ./outputs/longvideobench
+```
+
+For MLVU:
+
+```bash
+uv run lmms-eval \
+  --model flexmem_fast \
+  --model_args pretrained=/path/to/LLaVA-Video-7B-Qwen2,batch_size=1 \
+  --tasks mlvu_dev \
+  --batch_size 1 \
+  --output_path ./outputs/mlvu
+```
+
+lmms-eval downloads the benchmark data according to each task definition. Set `HF_HOME` before running if its dataset cache should live outside the default location. `flexmem` defaults to [`flexmem_lmms_eval/configs/flexmem.yaml`](flexmem_lmms_eval/configs/flexmem.yaml), while `flexmem_fast` uses the original `FlexMem-fast/config.yaml`; pass `config_path=/path/to/config.yaml` in `--model_args` to override either. `longvideobench_*_v` is the compatible LongVideoBench task family because FlexMem consumes each video as one visual stream.
 ### Long Video Benchmark Evaluation
 For **LongVideoBench** evaluation, you can use the following script to evaluate.
 

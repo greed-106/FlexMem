@@ -1,0 +1,11 @@
+### foundation
+sample_fps: 2
+max_num_frames: 1024
+tokens_per_frame: 210
+
+### flexmem
+chunk_size: 8
+preblk: 12
+preratio: 4
+decratio: 2
+topb: 16

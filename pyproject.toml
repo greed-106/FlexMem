@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flexmem"
+version = "0.1.0"
+description = "FlexMem with an lmms-eval model plugin"
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+license = { file = "LICENSE.txt" }
+authors = [{ name = "FlexMem authors" }]
+dependencies = [
+  "accelerate>=1.0.1,<2",
+  "av>=13,<16",
+  "decord==0.6.0; platform_system != 'Darwin'",
+  "einops==0.6.1",
+  "einops-exts==0.0.4",
+  "ftfy>=6.3.0",
+  "lmms-eval==0.7.3",
+  "numpy==1.26.4",
+  "open-clip-torch==2.26.1",
+  "opencv-python-headless>=4.10",
+  "peft>=0.4.0",
+  "pillow>=10.4.0",
+  "PyYAML>=6.0.2",
+  "requests>=2.32.3",
+  "sentencepiece>=0.1.99",
+  "timm>=1.0.10",
+  "torch==2.9.1+cu128",
+  "torchvision==0.24.1+cu128",
+  "transformers==4.50.0",
+]
+
+[project.entry-points."lmms_eval.models"]
+flexmem = "flexmem_lmms_eval.plugin:get_model_manifests"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+]
+
+[[tool.uv.index]]
+name = "tuna"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+
+[tool.hatch.build.targets.wheel]
+packages = ["FlexMem/flexmem", "FlexMem/llava", "flexmem_lmms_eval"]
+artifacts = ["flexmem_lmms_eval/configs/*.yaml"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"FlexMem-fast" = "flexmem_lmms_eval/fast_source"
+"flexmem_lmms_eval/tasks" = "flexmem_lmms_eval/tasks"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/FlexMem",
+  "/FlexMem-fast",
+  "/flexmem_lmms_eval",
+  "/README.md",
+  "/LICENSE.txt",
+  "/pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
